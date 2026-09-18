@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+*.d.ts
+*.d.ts.map
+vitest.config.js*
+coverage/
+.DS_Store

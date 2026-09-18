@@ -1,0 +1,33 @@
+{
+  "name": "@pineorca/data",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./columnar": {
+      "import": "./src/columnar/index.ts",
+      "types": "./src/columnar/index.ts"
+    },
+    "./storage": {
+      "import": "./src/storage/index.ts",
+      "types": "./src/storage/index.ts"
+    },
+    "./feed": {
+      "import": "./src/feed/index.ts",
+      "types": "./src/feed/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.0.0"
+  }
+}
