@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Native Pine v5/v6 Transpiler & Core Execution Kernel"
-status: pending
+status: complete
 priority: P1
 effort: "7d"
 dependencies: ["1"]
