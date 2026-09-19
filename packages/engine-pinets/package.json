@@ -21,6 +21,10 @@
     "./worker": {
       "import": "./src/worker/worker.ts",
       "types": "./src/worker/worker.ts"
+    },
+    "./broker": {
+      "import": "./src/broker/index.ts",
+      "types": "./src/broker/index.ts"
     }
   },
   "scripts": {

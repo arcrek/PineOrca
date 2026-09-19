@@ -85,7 +85,7 @@ flowchart TD
 |:---:|---|---|:---:|:---:|
 | **1** | [Columnar Storage & Worker IPC](./phase-01-columnar-storage-worker-ipc.md) | Zero-copy `Float64Array` buffers, IndexedDB caching, Typed Worker Bridge | Completed | 5d |
 | **2** | [Transpiler & Execution Kernel](./phase-02-transpiler-execution-kernel.md) | PineTS v5/v6 parser, AST callsite IDs, `FastSeries`, sync loop unrolling | Completed | 7d |
-| **3** | [Broker Emulator & TV Parity](./phase-03-broker-emulator-parity.md) | Order precedence, FIFO lot splitting, intrabar polarity, margin calls | Pending | 7d |
+| **3** | [Broker Emulator & TV Parity](./phase-03-broker-emulator-parity.md) | Order precedence, FIFO lot splitting, intrabar polarity, margin calls | Completed | 7d |
 | **4** | [Vela Chart & Trade Markers](./phase-04-vela-chart-trade-markers.md) | WebGL2 canvas mount, multi-pane routing, scene translator, trade markers | Pending | 5d |
 | **5** | [Strategy Tester & Monaco IDE](./phase-05-strategy-tester-monaco-ide.md) | Dockable container, equity curve, summary grid, virtual trade list, editor | Pending | 7d |
 | **6** | [Streaming & Golden Parity Suite](./phase-06-streaming-golden-parity.md) | WebSocket tick streaming, provisional rollback, 5-strategy TV oracle tests | Pending | 5d |

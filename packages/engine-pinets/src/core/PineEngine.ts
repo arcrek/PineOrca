@@ -5,15 +5,7 @@ import { Context } from '../Context.class';
 import { PineContext } from './PineContext';
 import { FastSeries } from './FastSeries';
 import { Series } from '../Series';
-import {
-  processStrategyOrders,
-  processExitOrders,
-  processMarginCall,
-  finalizeStrategyBar,
-  finalizeStrategyRun,
-  isAdverseFirstBar,
-  applyPendingCloseMarginCall,
-} from '../namespaces/strategy/utils';
+import { stepBar, finalizeRun } from '../broker';
 
 export interface ExecutionOptions {
   startIdx?: number;
@@ -57,14 +49,7 @@ export class PineEngine {
 
       // Strategy broker emulator checkpoints
       if (context.strategy) {
-        applyPendingCloseMarginCall(context);
-        processStrategyOrders(context);
-        processMarginCall(context, 'open');
-        const adverseFirst = isAdverseFirstBar(context);
-        if (adverseFirst) processMarginCall(context, 'extreme');
-        processExitOrders(context, 'intrabar');
-        if (!adverseFirst) processMarginCall(context, 'extreme');
-        finalizeStrategyBar(context);
+        stepBar(context);
       }
 
       // Synchronous execution of transpiled script
@@ -92,7 +77,7 @@ export class PineEngine {
 
     // Finalize strategy metrics and risk ratios
     if (context.strategy) {
-      finalizeStrategyRun(context);
+      finalizeRun(context);
     }
   }
 
@@ -120,14 +105,7 @@ export class PineEngine {
       context._execTick = (context._execTick || 0) + 1;
 
       if (context.strategy) {
-        applyPendingCloseMarginCall(context);
-        processStrategyOrders(context);
-        processMarginCall(context, 'open');
-        const adverseFirst = isAdverseFirstBar(context);
-        if (adverseFirst) processMarginCall(context, 'extreme');
-        processExitOrders(context, 'intrabar');
-        if (!adverseFirst) processMarginCall(context, 'extreme');
-        finalizeStrategyBar(context);
+        stepBar(context);
       }
 
       const result = await transpiledFn(context);
@@ -148,7 +126,7 @@ export class PineEngine {
     }
 
     if (context.strategy) {
-      finalizeStrategyRun(context);
+      finalizeRun(context);
     }
   }
 

@@ -5,7 +5,7 @@ import { Context } from './Context.class';
 import { splitTickerModifier, withTickerModifier } from './tickerModifier';
 import { Series } from './Series';
 import { Indicator } from './Indicator';
-import { processStrategyOrders, processExitOrders, processMarginCall, finalizeStrategyBar, finalizeStrategyRun, isAdverseFirstBar, applyPendingCloseMarginCall, snapshotStrategyState, restoreStrategyState } from './namespaces/strategy/utils';
+import { stepBar, finalizeRun, snapshotStrategyState, restoreStrategyState } from './broker';
 
 // ── Timeframe duration utility ──────────────────────────────────────
 //prettier-ignore
@@ -1168,32 +1168,7 @@ export class PineTS {
             // 'open' phase of processExitOrders implements the minority
             // (exit-first) semantics and is currently not wired in.
             if (context.strategy) {
-                // Book a second margin call scheduled on the PREVIOUS bar
-                // by the phantom re-check (it fills at that bar's close,
-                // after its script evaluation — see processMarginCall and
-                // applyPendingCloseMarginCall). Must run before entries so
-                // a reversal queued at that close (qty frozen at queue
-                // time) overshoots by exactly the deferred quantity, as TV
-                // does.
-                applyPendingCloseMarginCall(context);
-                processStrategyOrders(context);
-                // Margin checkpoints along the intra-bar path (TV broker
-                // emulator): first at the OPEN right after entries fill;
-                // then at the adverse extreme — BEFORE exit fills when the
-                // bar's first move is adverse for the position (the
-                // extreme precedes the favorable exits on the path), AFTER
-                // them otherwise (favorable exits free margin first). The
-                // 'extreme' checkpoint may schedule a deferred second
-                // margin call at this bar's close (phantom re-check).
-                processMarginCall(context, 'open');
-                const adverseFirst = isAdverseFirstBar(context);
-                if (adverseFirst) processMarginCall(context, 'extreme');
-                processExitOrders(context, 'intrabar');
-                if (!adverseFirst) processMarginCall(context, 'extreme');
-                // Latch max_drawdown / max_runup ONCE at the end of the bar so
-                // trades closed mid-bar by TP / SL contribute their realized
-                // P&L (not phantom intra-bar excursions against the raw H/L).
-                finalizeStrategyBar(context);
+                stepBar(context);
             }
 
             const result = await transpiledFn(context);
@@ -1263,7 +1238,7 @@ export class PineTS {
         // (Sharpe / Sortino) from the monthly equity curve accumulated
         // across the bar loop. Runs once, after the last bar.
         if (context.strategy) {
-            finalizeStrategyRun(context);
+            finalizeRun(context);
         }
     }
 }
