@@ -1,0 +1,38 @@
+{
+  "name": "@pineorca/engine-pinets",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./transpiler": {
+      "import": "./src/transpiler/PineTranspiler.ts",
+      "types": "./src/transpiler/PineTranspiler.ts"
+    },
+    "./core": {
+      "import": "./src/core/index.ts",
+      "types": "./src/core/index.ts"
+    },
+    "./worker": {
+      "import": "./src/worker/worker.ts",
+      "types": "./src/worker/worker.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@pineorca/data": "*",
+    "@pineorca/worker-bridge": "*",
+    "acorn": "^8.14.0",
+    "acorn-walk": "^8.3.4",
+    "astring": "^1.9.0"
+  },
+  "license": "AGPL-3.0-only"
+}

@@ -16,6 +16,7 @@
   "files": [],
   "references": [
     { "path": "./packages/data" },
-    { "path": "./packages/worker-bridge" }
+    { "path": "./packages/worker-bridge" },
+    { "path": "./packages/engine-pinets" }
   ]
 }
