@@ -1,7 +1,7 @@
 ---
 phase: 5
 title: "Dockable Strategy Tester & Monaco Pine Script IDE"
-status: pending
+status: completed
 priority: P1
 effort: "7d"
 dependencies: ["4"]
