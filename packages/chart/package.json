@@ -1,0 +1,40 @@
+{
+  "name": "@pineorca/chart",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./scene": {
+      "import": "./src/scene/SceneTranslator.ts",
+      "types": "./src/scene/SceneTranslator.ts"
+    },
+    "./markers": {
+      "import": "./src/markers/TradeMarkerLayer.ts",
+      "types": "./src/markers/TradeMarkerLayer.ts"
+    },
+    "./interaction": {
+      "import": "./src/markers/TradeMarkerInteraction.ts",
+      "types": "./src/markers/TradeMarkerInteraction.ts"
+    },
+    "./adapter": {
+      "import": "./src/VelaChartAdapter.ts",
+      "types": "./src/VelaChartAdapter.ts"
+    }
+  },
+  "dependencies": {
+    "@luxalgo/vela": "^0.7.6",
+    "@pineorca/data": "*",
+    "@pineorca/engine-pinets": "*",
+    "@pineorca/worker-bridge": "*"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  }
+}

@@ -18,6 +18,7 @@
     "vitest": "^3.0.0"
   },
   "dependencies": {
+    "@luxalgo/vela": "file:../../../../tmp/Vela",
     "acorn": "^8.18.0",
     "acorn-walk": "^8.3.5",
     "astring": "^1.9.0"
