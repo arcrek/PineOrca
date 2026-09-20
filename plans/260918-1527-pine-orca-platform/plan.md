@@ -1,7 +1,7 @@
 ---
 title: "PineOrca: High-Fidelity Pine Script v5/v6 Platform & Backtesting Architecture"
 description: "End-to-end architecture and implementation roadmap for native Pine Script execution, TradingView-parity backtesting, and WebGL2 UI with Strategy Tester and Monaco IDE."
-status: in_progress
+status: completed
 priority: P1
 effort: "36d"
 tags: ["pinescript", "backtesting", "tradingview", "webgl2", "pinets", "vela"]
@@ -88,7 +88,7 @@ flowchart TD
 | **3** | [Broker Emulator & TV Parity](./phase-03-broker-emulator-parity.md) | Order precedence, FIFO lot splitting, intrabar polarity, margin calls | Completed | 7d |
 | **4** | [Vela Chart & Trade Markers](./phase-04-vela-chart-trade-markers.md) | WebGL2 canvas mount, multi-pane routing, scene translator, trade markers | Completed | 5d |
 | **5** | [Strategy Tester & Monaco IDE](./phase-05-strategy-tester-monaco-ide.md) | Dockable container, equity curve, summary grid, virtual trade list, editor | Completed | 7d |
-| **6** | [Streaming & Golden Parity Suite](./phase-06-streaming-golden-parity.md) | WebSocket tick streaming, provisional rollback, 5-strategy TV oracle tests | Pending | 5d |
+| **6** | [Streaming & Golden Parity Suite](./phase-06-streaming-golden-parity.md) | WebSocket tick streaming, provisional rollback, 5-strategy TV oracle tests | Completed | 5d |
 
 ---
 

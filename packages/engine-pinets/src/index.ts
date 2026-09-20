@@ -10,3 +10,4 @@ export { handleWorkerCommand } from './worker/worker';
 export { Context } from './Context.class';
 export { Series } from './Series';
 export * from './broker/index';
+export * from './streaming/index';

@@ -1,0 +1,547 @@
+{
+  "name": "Turtle Trend System",
+  "description": "Trailing stops, tick-based exit brackets, and peak tracking",
+  "pineScript": "//@version=5\nstrategy(\"Turtle Trend System\", overlay=true, pyramiding=1, initial_capital=100000, default_qty_type=strategy.fixed, default_qty_value=1, currency=currency.USD)\nhighest20 = ta.highest(high, 20)\nenterLong = ta.crossover(close, highest20[1])\nif (enterLong)\n    strategy.entry(\"TurtleLong\", strategy.long)\nstrategy.exit(\"ExitLong\", \"TurtleLong\", trail_points=50, trail_offset=20)\n",
+  "symbol": "BINANCE:AVAXUSDT",
+  "timeframe": "1D",
+  "config": {
+    "title": "Turtle Trend System",
+    "shorttitle": "",
+    "overlay": true,
+    "format": "inherit",
+    "precision": 10,
+    "scale": "right",
+    "pyramiding": 1,
+    "calc_on_order_fills": false,
+    "calc_on_every_tick": false,
+    "max_bars_back": 0,
+    "backtest_fill_limits_assumption": 0,
+    "default_qty_type": "fixed",
+    "default_qty_value": 1,
+    "initial_capital": 100000,
+    "currency": "USD",
+    "slippage": 0,
+    "commission_type": "percent",
+    "commission_value": 0,
+    "margin_long": 100,
+    "margin_short": 100,
+    "explicit_plot_zorder": false,
+    "max_lines_count": 50,
+    "max_labels_count": 50,
+    "max_boxes_count": 50,
+    "max_polylines_count": 50,
+    "risk_free_rate": 2,
+    "use_bar_magnifier": false,
+    "fill_orders_on_standard_ohlc": false
+  },
+  "bars": [
+    {
+      "time": 1609459200000,
+      "open": 100,
+      "high": 103,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1609545600000,
+      "open": 100,
+      "high": 104,
+      "low": 97,
+      "close": 101,
+      "volume": 1000
+    },
+    {
+      "time": 1609632000000,
+      "open": 101,
+      "high": 105,
+      "low": 98,
+      "close": 102,
+      "volume": 1000
+    },
+    {
+      "time": 1609718400000,
+      "open": 102,
+      "high": 105,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1609804800000,
+      "open": 100,
+      "high": 104,
+      "low": 97,
+      "close": 101,
+      "volume": 1000
+    },
+    {
+      "time": 1609891200000,
+      "open": 101,
+      "high": 105,
+      "low": 98,
+      "close": 102,
+      "volume": 1000
+    },
+    {
+      "time": 1609977600000,
+      "open": 102,
+      "high": 105,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1610064000000,
+      "open": 100,
+      "high": 104,
+      "low": 97,
+      "close": 101,
+      "volume": 1000
+    },
+    {
+      "time": 1610150400000,
+      "open": 101,
+      "high": 105,
+      "low": 98,
+      "close": 102,
+      "volume": 1000
+    },
+    {
+      "time": 1610236800000,
+      "open": 102,
+      "high": 105,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1610323200000,
+      "open": 100,
+      "high": 104,
+      "low": 97,
+      "close": 101,
+      "volume": 1000
+    },
+    {
+      "time": 1610409600000,
+      "open": 101,
+      "high": 105,
+      "low": 98,
+      "close": 102,
+      "volume": 1000
+    },
+    {
+      "time": 1610496000000,
+      "open": 102,
+      "high": 105,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1610582400000,
+      "open": 100,
+      "high": 104,
+      "low": 97,
+      "close": 101,
+      "volume": 1000
+    },
+    {
+      "time": 1610668800000,
+      "open": 101,
+      "high": 105,
+      "low": 98,
+      "close": 102,
+      "volume": 1000
+    },
+    {
+      "time": 1610755200000,
+      "open": 102,
+      "high": 105,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1610841600000,
+      "open": 100,
+      "high": 104,
+      "low": 97,
+      "close": 101,
+      "volume": 1000
+    },
+    {
+      "time": 1610928000000,
+      "open": 101,
+      "high": 105,
+      "low": 98,
+      "close": 102,
+      "volume": 1000
+    },
+    {
+      "time": 1611014400000,
+      "open": 102,
+      "high": 105,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1611100800000,
+      "open": 100,
+      "high": 104,
+      "low": 97,
+      "close": 101,
+      "volume": 1000
+    },
+    {
+      "time": 1611187200000,
+      "open": 101,
+      "high": 105,
+      "low": 98,
+      "close": 102,
+      "volume": 1000
+    },
+    {
+      "time": 1611273600000,
+      "open": 102,
+      "high": 105,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1611360000000,
+      "open": 100,
+      "high": 104,
+      "low": 97,
+      "close": 101,
+      "volume": 1000
+    },
+    {
+      "time": 1611446400000,
+      "open": 101,
+      "high": 105,
+      "low": 98,
+      "close": 102,
+      "volume": 1000
+    },
+    {
+      "time": 1611532800000,
+      "open": 102,
+      "high": 105,
+      "low": 97,
+      "close": 100,
+      "volume": 1000
+    },
+    {
+      "time": 1611619200000,
+      "open": 100,
+      "high": 116,
+      "low": 97,
+      "close": 113,
+      "volume": 1000
+    },
+    {
+      "time": 1611705600000,
+      "open": 113,
+      "high": 124,
+      "low": 110,
+      "close": 121,
+      "volume": 1000
+    },
+    {
+      "time": 1611792000000,
+      "open": 121,
+      "high": 132,
+      "low": 118,
+      "close": 129,
+      "volume": 1000
+    },
+    {
+      "time": 1611878400000,
+      "open": 129,
+      "high": 140,
+      "low": 126,
+      "close": 137,
+      "volume": 1000
+    },
+    {
+      "time": 1611964800000,
+      "open": 137,
+      "high": 148,
+      "low": 134,
+      "close": 145,
+      "volume": 1000
+    },
+    {
+      "time": 1612051200000,
+      "open": 145,
+      "high": 156,
+      "low": 142,
+      "close": 153,
+      "volume": 1000
+    },
+    {
+      "time": 1612137600000,
+      "open": 153,
+      "high": 164,
+      "low": 150,
+      "close": 161,
+      "volume": 1000
+    },
+    {
+      "time": 1612224000000,
+      "open": 161,
+      "high": 172,
+      "low": 158,
+      "close": 169,
+      "volume": 1000
+    },
+    {
+      "time": 1612310400000,
+      "open": 169,
+      "high": 180,
+      "low": 166,
+      "close": 177,
+      "volume": 1000
+    },
+    {
+      "time": 1612396800000,
+      "open": 177,
+      "high": 188,
+      "low": 174,
+      "close": 185,
+      "volume": 1000
+    },
+    {
+      "time": 1612483200000,
+      "open": 185,
+      "high": 196,
+      "low": 182,
+      "close": 193,
+      "volume": 1000
+    },
+    {
+      "time": 1612569600000,
+      "open": 193,
+      "high": 204,
+      "low": 190,
+      "close": 201,
+      "volume": 1000
+    },
+    {
+      "time": 1612656000000,
+      "open": 201,
+      "high": 212,
+      "low": 198,
+      "close": 209,
+      "volume": 1000
+    },
+    {
+      "time": 1612742400000,
+      "open": 209,
+      "high": 220,
+      "low": 206,
+      "close": 217,
+      "volume": 1000
+    },
+    {
+      "time": 1612828800000,
+      "open": 217,
+      "high": 228,
+      "low": 214,
+      "close": 225,
+      "volume": 1000
+    },
+    {
+      "time": 1612915200000,
+      "open": 225,
+      "high": 228,
+      "low": 212,
+      "close": 215,
+      "volume": 1000
+    },
+    {
+      "time": 1613001600000,
+      "open": 215,
+      "high": 218,
+      "low": 202,
+      "close": 205,
+      "volume": 1000
+    },
+    {
+      "time": 1613088000000,
+      "open": 205,
+      "high": 208,
+      "low": 192,
+      "close": 195,
+      "volume": 1000
+    },
+    {
+      "time": 1613174400000,
+      "open": 195,
+      "high": 198,
+      "low": 182,
+      "close": 185,
+      "volume": 1000
+    },
+    {
+      "time": 1613260800000,
+      "open": 185,
+      "high": 188,
+      "low": 172,
+      "close": 175,
+      "volume": 1000
+    },
+    {
+      "time": 1613347200000,
+      "open": 175,
+      "high": 178,
+      "low": 162,
+      "close": 165,
+      "volume": 1000
+    },
+    {
+      "time": 1613433600000,
+      "open": 165,
+      "high": 168,
+      "low": 152,
+      "close": 155,
+      "volume": 1000
+    },
+    {
+      "time": 1613520000000,
+      "open": 155,
+      "high": 158,
+      "low": 142,
+      "close": 145,
+      "volume": 1000
+    },
+    {
+      "time": 1613606400000,
+      "open": 145,
+      "high": 148,
+      "low": 132,
+      "close": 135,
+      "volume": 1000
+    },
+    {
+      "time": 1613692800000,
+      "open": 135,
+      "high": 138,
+      "low": 122,
+      "close": 125,
+      "volume": 1000
+    },
+    {
+      "time": 1613779200000,
+      "open": 125,
+      "high": 128,
+      "low": 112,
+      "close": 115,
+      "volume": 1000
+    },
+    {
+      "time": 1613865600000,
+      "open": 115,
+      "high": 118,
+      "low": 102,
+      "close": 105,
+      "volume": 1000
+    },
+    {
+      "time": 1613952000000,
+      "open": 105,
+      "high": 108,
+      "low": 92,
+      "close": 95,
+      "volume": 1000
+    },
+    {
+      "time": 1614038400000,
+      "open": 95,
+      "high": 98,
+      "low": 82,
+      "close": 85,
+      "volume": 1000
+    },
+    {
+      "time": 1614124800000,
+      "open": 85,
+      "high": 88,
+      "low": 72,
+      "close": 75,
+      "volume": 1000
+    },
+    {
+      "time": 1614211200000,
+      "open": 75,
+      "high": 78,
+      "low": 62,
+      "close": 65,
+      "volume": 1000
+    },
+    {
+      "time": 1614297600000,
+      "open": 65,
+      "high": 68,
+      "low": 52,
+      "close": 55,
+      "volume": 1000
+    },
+    {
+      "time": 1614384000000,
+      "open": 55,
+      "high": 58,
+      "low": 42,
+      "close": 45,
+      "volume": 1000
+    },
+    {
+      "time": 1614470400000,
+      "open": 45,
+      "high": 48,
+      "low": 32,
+      "close": 35,
+      "volume": 1000
+    },
+    {
+      "time": 1614556800000,
+      "open": 35,
+      "high": 38,
+      "low": 22,
+      "close": 25,
+      "volume": 1000
+    }
+  ],
+  "expected": {
+    "metrics": {
+      "totalClosedTrades": 1,
+      "winningTrades": 1,
+      "losingTrades": 0,
+      "evenTrades": 0,
+      "netProfit": 10.799999999999997,
+      "grossProfit": 10.799999999999997,
+      "grossLoss": 0,
+      "profitFactor": null,
+      "maxDrawdown": 0,
+      "maxDrawdownPercent": 0
+    },
+    "trades": [
+      {
+        "entry_id": "TurtleLong",
+        "entry_price": 113,
+        "entry_bar_index": 26,
+        "entry_time": 1611705600000,
+        "exit_id": "ExitLong",
+        "exit_price": 123.8,
+        "exit_bar_index": 26,
+        "exit_time": 1611705600000,
+        "size": 1,
+        "profit": 10.799999999999997
+      }
+    ]
+  }
+}

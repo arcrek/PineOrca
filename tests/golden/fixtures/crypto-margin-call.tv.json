@@ -1,0 +1,147 @@
+{
+  "name": "Leveraged Crypto Perpetual",
+  "description": "High-leverage BTCUSDT margin liquidation under high volatility",
+  "pineScript": "//@version=5\nstrategy(\"Crypto Perpetual Margin\", overlay=true, initial_capital=10000, default_qty_type=strategy.fixed, default_qty_value=1, margin_long=10, margin_short=10, currency=currency.USD)\nif (bar_index == 2)\n    strategy.entry(\"Long10x\", strategy.long)\n",
+  "symbol": "BINANCE:BTCUSDT",
+  "timeframe": "1D",
+  "config": {
+    "title": "Crypto Perpetual Margin",
+    "shorttitle": "",
+    "overlay": true,
+    "format": "inherit",
+    "precision": 10,
+    "scale": "right",
+    "pyramiding": 1,
+    "calc_on_order_fills": false,
+    "calc_on_every_tick": false,
+    "max_bars_back": 0,
+    "backtest_fill_limits_assumption": 0,
+    "default_qty_type": "fixed",
+    "default_qty_value": 1,
+    "initial_capital": 10000,
+    "currency": "USD",
+    "slippage": 0,
+    "commission_type": "percent",
+    "commission_value": 0,
+    "margin_long": 10,
+    "margin_short": 10,
+    "explicit_plot_zorder": false,
+    "max_lines_count": 50,
+    "max_labels_count": 50,
+    "max_boxes_count": 50,
+    "max_polylines_count": 50,
+    "risk_free_rate": 2,
+    "use_bar_magnifier": false,
+    "fill_orders_on_standard_ohlc": false
+  },
+  "bars": [
+    {
+      "time": 1609459200000,
+      "open": 50000,
+      "high": 50100,
+      "low": 49900,
+      "close": 50000,
+      "volume": 1000
+    },
+    {
+      "time": 1609545600000,
+      "open": 50000,
+      "high": 50200,
+      "low": 49900,
+      "close": 50100,
+      "volume": 1000
+    },
+    {
+      "time": 1609632000000,
+      "open": 50100,
+      "high": 50200,
+      "low": 49900,
+      "close": 50000,
+      "volume": 1000
+    },
+    {
+      "time": 1609718400000,
+      "open": 50000,
+      "high": 50100,
+      "low": 49700,
+      "close": 49800,
+      "volume": 1000
+    },
+    {
+      "time": 1609804800000,
+      "open": 49800,
+      "high": 49900,
+      "low": 42900,
+      "close": 43000,
+      "volume": 1000
+    },
+    {
+      "time": 1609891200000,
+      "open": 43000,
+      "high": 43100,
+      "low": 41900,
+      "close": 42000,
+      "volume": 1000
+    },
+    {
+      "time": 1609977600000,
+      "open": 42000,
+      "high": 42100,
+      "low": 40900,
+      "close": 41000,
+      "volume": 1000
+    },
+    {
+      "time": 1610064000000,
+      "open": 41000,
+      "high": 41100,
+      "low": 39900,
+      "close": 40000,
+      "volume": 1000
+    },
+    {
+      "time": 1610150400000,
+      "open": 40000,
+      "high": 41100,
+      "low": 39900,
+      "close": 41000,
+      "volume": 1000
+    },
+    {
+      "time": 1610236800000,
+      "open": 41000,
+      "high": 42100,
+      "low": 40900,
+      "close": 42000,
+      "volume": 1000
+    }
+  ],
+  "expected": {
+    "metrics": {
+      "totalClosedTrades": 1,
+      "winningTrades": 0,
+      "losingTrades": 1,
+      "evenTrades": 0,
+      "netProfit": -7100,
+      "grossProfit": 0,
+      "grossLoss": 7100,
+      "profitFactor": 0,
+      "maxDrawdown": 7100,
+      "maxDrawdownPercent": 71
+    },
+    "trades": [
+      {
+        "entry_id": "Long10x",
+        "entry_price": 50000,
+        "entry_bar_index": 3,
+        "entry_time": 1609718400000,
+        "exit_id": "Margin call",
+        "exit_price": 42900,
+        "exit_bar_index": 4,
+        "exit_time": 1609804800000,
+        "size": 1,
+        "profit": -7100
+      }
+    ]
+  }
+}

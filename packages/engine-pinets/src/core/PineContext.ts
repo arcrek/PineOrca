@@ -150,6 +150,68 @@ export class PineContext extends Context {
     }
     return s;
   }
+
+  /**
+   * Resizes or ensures columnar table capacity for streaming realtime bars.
+   */
+  public ensureTableCapacity(capacity: number): void {
+    if (!this.table) {
+      const activeLen = this.length;
+      this.bindTable(ColumnarBarTable.allocate(capacity));
+      this.length = activeLen;
+      return;
+    }
+    if (this.table.length < capacity) {
+      const activeLen = this.length;
+      const newCap = Math.max(capacity, Math.ceil(this.table.length * 1.5), 64);
+      const newTable = ColumnarBarTable.allocate(newCap);
+      const oldLen = this.table.length;
+      newTable.time.set(this.table.time.subarray(0, oldLen), 0);
+      newTable.open.set(this.table.open.subarray(0, oldLen), 0);
+      newTable.high.set(this.table.high.subarray(0, oldLen), 0);
+      newTable.low.set(this.table.low.subarray(0, oldLen), 0);
+      newTable.close.set(this.table.close.subarray(0, oldLen), 0);
+      newTable.volume.set(this.table.volume.subarray(0, oldLen), 0);
+      this.bindTable(newTable);
+      this.length = activeLen;
+    }
+  }
+
+  /**
+   * Sets the OHLCV values of a bar at index without reallocating buffers.
+   */
+  public setBarAt(
+    index: number,
+    bar: { time: number; open: number; high: number; low: number; close: number; volume: number },
+  ): void {
+    if (!this.table || this.table.length <= index) {
+      this.ensureTableCapacity(index + 1);
+    }
+    const t = this.table!;
+    t.time[index] = bar.time;
+    t.open[index] = bar.open;
+    t.high[index] = bar.high;
+    t.low[index] = bar.low;
+    t.close[index] = bar.close;
+    t.volume[index] = bar.volume;
+
+    const o = bar.open;
+    const h = bar.high;
+    const l = bar.low;
+    const c = bar.close;
+
+    if (this.data.hl2?.buffer) this.data.hl2.buffer[index] = (h + l) * 0.5;
+    if (this.data.hlc3?.buffer) this.data.hlc3.buffer[index] = (h + l + c) / 3;
+    if (this.data.ohlc4?.buffer) this.data.ohlc4.buffer[index] = (o + h + l + c) * 0.25;
+    if (this.data.hlcc4?.buffer) this.data.hlcc4.buffer[index] = (h + l + c + c) * 0.25;
+    if (this.data.bar_index?.buffer) this.data.bar_index.buffer[index] = index;
+    const tfDur = getTimeframeDurationMs(this.timeframe);
+    if (this.data.closeTime?.buffer) this.data.closeTime.buffer[index] = bar.time + tfDur;
+
+    if (this.length <= index) {
+      this.length = index + 1;
+    }
+  }
 }
 
 export default PineContext;

@@ -155,7 +155,7 @@ export class PineEngine {
     }
   }
 
-  private static shiftVariables(context: Context): void {
+  public static shiftVariables(context: Context): void {
     const shift = (container: any) => {
       for (let c = 0; c < this.CONTEXT_VAR_NAMES.length; c++) {
         const name = this.CONTEXT_VAR_NAMES[c];
