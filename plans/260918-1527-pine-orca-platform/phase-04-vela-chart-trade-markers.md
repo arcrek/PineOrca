@@ -1,7 +1,7 @@
 ---
 phase: 4
 title: "Vela WebGL2 Chart Integration & Trade Marker Subsystem"
-status: pending
+status: completed
 priority: P1
 effort: "5d"
 dependencies: ["3"]
