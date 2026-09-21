@@ -1,5 +1,6 @@
-import { Vela, type VelaOptions, type VelaTheme } from '@luxalgo/vela';
+import { Vela, type VelaOptions, type VelaTheme, type OHLCV } from '@luxalgo/vela';
 import type { IndicatorModel, TradeExecution } from '@luxalgo/vela/plugin';
+import type { ColumnarBarTable } from '@pineorca/data';
 import { SceneTranslator } from './scene/SceneTranslator.js';
 import type { PineRun } from './scene/types.js';
 import { TradeMarkerLayer, type TradeMarkerDeps, type TradeMarkerDisplayOptions, type TradeMarkerStyleConfig } from './markers/TradeMarkerLayer.js';
@@ -11,6 +12,7 @@ export interface VelaChartAdapterOptions {
     symbol?: string;
     timeframe?: string;
     bars?: number;
+    data?: OHLCV[];
     live?: boolean;
     tradeMarkers?: TradeMarkerDisplayOptions;
     markerStyle?: TradeMarkerStyleConfig;
@@ -32,6 +34,7 @@ export class VelaChartAdapter {
     private mountedIndicators = new Map<string, IndicatorModel>();
     private instanceSubpaneMap = new Map<string, string>();
     private paneCounter = 0;
+    private cachedBars: OHLCV[] | null = null;
 
     constructor(options: VelaChartAdapterOptions = {}) {
         this.options = options;
@@ -104,6 +107,7 @@ export class VelaChartAdapter {
             timeframe: this.options.timeframe,
             bars: this.options.bars,
             live: this.options.live,
+            data: this.cachedBars ?? this.options.data,
             theme,
             nativeBackend: 'auto',
         };
@@ -276,6 +280,42 @@ export class VelaChartAdapter {
 
     selectTrade(tradeId: string | null): void {
         this.markerLayer.setSelectedTradeId(tradeId);
+        this.requestMarkerRepaint();
+    }
+
+    /**
+     * Sets OHLCV bars onto the Vela chart instance.
+     * Converts ColumnarBarTable (SoA) to OHLCV array (AoS) if needed,
+     * and updates the chart market state.
+     */
+    async setBars(bars: ColumnarBarTable | readonly OHLCV[]): Promise<void> {
+        let ohlcv: OHLCV[];
+        if ('length' in bars && 'time' in bars && 'open' in bars) {
+            const table = bars as ColumnarBarTable;
+            const len = table.length;
+            ohlcv = new Array(len);
+            for (let i = 0; i < len; i++) {
+                ohlcv[i] = {
+                    time: table.time[i],
+                    open: table.open[i],
+                    high: table.high[i],
+                    low: table.low[i],
+                    close: table.close[i],
+                    volume: table.volume[i],
+                };
+            }
+        } else {
+            ohlcv = bars as OHLCV[];
+        }
+
+        this.cachedBars = ohlcv;
+
+        if (this.vela) {
+            const velaAny = this.vela as any;
+            if (typeof velaAny.setMarket === 'function') {
+                await velaAny.setMarket({ data: ohlcv });
+            }
+        }
         this.requestMarkerRepaint();
     }
 

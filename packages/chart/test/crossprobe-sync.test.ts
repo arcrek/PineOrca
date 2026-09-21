@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { VelaChartAdapter } from '../src/VelaChartAdapter.js';
 import { TradeMarkerLayer } from '../src/markers/TradeMarkerLayer.js';
+import { ColumnarBarTable } from '@pineorca/data';
 import type { TradeExecution } from '@luxalgo/vela/plugin';
 
 describe('VelaChartAdapter — Viewport Centering & CrossProbe Sync', () => {
@@ -150,6 +151,49 @@ describe('VelaChartAdapter — Viewport Centering & CrossProbe Sync', () => {
       from: 20_000,
       to: 80_000,
     });
+
+    adapter.destroy();
+  });
+
+
+  it('sets bars from ColumnarBarTable and calls setMarket on Vela', async () => {
+    const adapter = new VelaChartAdapter();
+    const mockVela = {
+      setMarket: vi.fn().mockResolvedValue(undefined),
+    };
+    (adapter as any).vela = mockVela;
+
+    const table = ColumnarBarTable.fromBars([
+      { time: 1000, open: 100, high: 110, low: 95, close: 105, volume: 50 },
+      { time: 2000, open: 105, high: 115, low: 100, close: 110, volume: 60 },
+    ]);
+
+    await adapter.setBars(table);
+
+    expect(mockVela.setMarket).toHaveBeenCalledWith({
+      data: [
+        { time: 1000, open: 100, high: 110, low: 95, close: 105, volume: 50 },
+        { time: 2000, open: 105, high: 115, low: 100, close: 110, volume: 60 },
+      ],
+    });
+
+    adapter.destroy();
+  });
+
+  it('sets bars from OHLCV array and calls setMarket on Vela', async () => {
+    const adapter = new VelaChartAdapter();
+    const mockVela = {
+      setMarket: vi.fn().mockResolvedValue(undefined),
+    };
+    (adapter as any).vela = mockVela;
+
+    const bars = [
+      { time: 5000, open: 50, high: 60, low: 45, close: 55, volume: 10 },
+    ];
+
+    await adapter.setBars(bars);
+
+    expect(mockVela.setMarket).toHaveBeenCalledWith({ data: bars });
 
     adapter.destroy();
   });
