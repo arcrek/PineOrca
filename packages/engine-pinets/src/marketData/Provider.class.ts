@@ -3,6 +3,7 @@
 import { BinanceProvider } from './Binance/BinanceProvider.class';
 import { FMPProvider } from './FMP/FMPProvider.class';
 import { AlpacaProvider } from './Alpaca/AlpacaProvider.class';
+import { YahooFinanceProvider } from './Yahoo/YahooFinanceProvider.class';
 import { IProvider } from './IProvider';
 import { BaseProvider } from './BaseProvider';
 // MockProvider is conditionally imported - excluded from browser builds via rollup plugin
@@ -13,6 +14,7 @@ import { MockProvider } from './Mock/MockProvider.class';
 export { BinanceProvider } from './Binance/BinanceProvider.class';
 export { FMPProvider } from './FMP/FMPProvider.class';
 export { AlpacaProvider } from './Alpaca/AlpacaProvider.class';
+export { YahooFinanceProvider } from './Yahoo/YahooFinanceProvider.class';
 export { BaseProvider } from './BaseProvider';
 
 type TProvider = {
@@ -38,9 +40,9 @@ if (isNodeEnvironment) {
 
 export const Provider: TProvider = {
     Binance: new BinanceProvider(),
+    Yahoo: new YahooFinanceProvider(),
     FMP: new FMPProvider(),
     Alpaca: new AlpacaProvider(),
-    // Only include Mock provider in Node.js environments (excluded from browser builds)
     ...(MockProviderInstance ? { Mock: MockProviderInstance } : {}),
 };
 

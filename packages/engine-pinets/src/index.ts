@@ -11,3 +11,4 @@ export { Context } from './Context.class';
 export { Series } from './Series';
 export * from './broker/index';
 export * from './streaming/index';
+export * from './marketData/index';

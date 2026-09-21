@@ -27,6 +27,7 @@ import { ISymbolInfo } from '../IProvider';
 import { BaseProvider } from '../BaseProvider';
 import { stripTickerModifier } from '../../tickerModifier';
 import { Kline, INTERVAL_DURATION_MS } from '../types';
+import type { Tick } from '../../streaming/LiveStreamingLoop';
 
 interface CacheEntry<T> {
     data: T;
@@ -476,4 +477,104 @@ export class BinanceProvider extends BaseProvider<BinanceProviderConfig> {
         }
     }
 
+    /**
+     * Subscribe to real-time trades/ticks via Binance WebSocket.
+     * Compatible with both spot (e.g. BTCUSDT) and futures (e.g. BTCUSDT.P).
+     *
+     * @param tickerId The symbol to subscribe to (e.g. 'BTCUSDT' or 'BTCUSDT.P')
+     * @param callback Function receiving normalized Tick events
+     * @param onError Optional error handler
+     * @returns Cleanup function to close the WebSocket and cancel reconnects
+     */
+    subscribeLiveTicks(
+        tickerId: string,
+        callback: (tick: Tick) => void,
+        onError?: (error: any) => void,
+    ): () => void {
+        let isTerminated = false;
+        let ws: any = null;
+        let reconnectTimeout: any = null;
+        let retryCount = 0;
+
+        tickerId = stripTickerModifier(tickerId);
+        const isFutures = tickerId.endsWith('.P');
+        const rawSymbol = (isFutures ? tickerId.slice(0, -2) : tickerId).toLowerCase();
+
+        const getWsUrl = () => {
+            const baseUrl = isFutures
+                ? 'wss://fstream.binance.com/ws'
+                : 'wss://stream.binance.com:9443/ws';
+            return `${baseUrl}/${rawSymbol}@trade`;
+        };
+
+        const connect = () => {
+            if (isTerminated) return;
+
+            try {
+                if (typeof WebSocket === 'undefined') {
+                    throw new Error('WebSocket is not supported in this runtime environment');
+                }
+
+                ws = new WebSocket(getWsUrl());
+
+                ws.onopen = () => {
+                    retryCount = 0;
+                };
+
+                ws.onmessage = (event: any) => {
+                    if (isTerminated) return;
+                    try {
+                        const raw = typeof event.data === 'string' ? event.data : event.data.toString();
+                        const data = JSON.parse(raw);
+                        if (data && data.p && data.T) {
+                            const tick: Tick = {
+                                price: parseFloat(data.p),
+                                volume: data.q ? parseFloat(data.q) : 0,
+                                time: Number(data.T) || Date.now(),
+                            };
+                            callback(tick);
+                        }
+                    } catch {
+                        // ignore malformed frame
+                    }
+                };
+
+                ws.onerror = (err: any) => {
+                    if (!isTerminated && onError) {
+                        onError(err);
+                    }
+                };
+
+                ws.onclose = () => {
+                    if (isTerminated) return;
+                    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+                    retryCount++;
+                    reconnectTimeout = setTimeout(connect, delay);
+                };
+            } catch (err) {
+                if (!isTerminated && onError) {
+                    onError(err);
+                }
+                const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+                retryCount++;
+                reconnectTimeout = setTimeout(connect, delay);
+            }
+        };
+
+        connect();
+
+        return () => {
+            isTerminated = true;
+            if (reconnectTimeout) {
+                clearTimeout(reconnectTimeout);
+                reconnectTimeout = null;
+            }
+            if (ws) {
+                try {
+                    ws.close();
+                } catch {}
+                ws = null;
+            }
+        };
+    }
 }
