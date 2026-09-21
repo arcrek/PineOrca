@@ -6,3 +6,4 @@ dist/
 vitest.config.js*
 coverage/
 .DS_Store
+*:Zone.Identifier
