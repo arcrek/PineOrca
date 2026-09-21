@@ -189,4 +189,25 @@ describe('AppController Lifecycle & Integration', () => {
 
     app.destroy();
   });
+
+  it('loads initial bars into chart adapter and handles loadMarketData', async () => {
+    const mockWorker = new MockAppWorker();
+    const app = new AppController({
+      container: container as unknown as HTMLElement,
+      worker: mockWorker,
+      barsCount: 20,
+    });
+
+    await app.init();
+
+    const chartAdapter = app.getChartAdapter();
+    expect(chartAdapter).not.toBeNull();
+
+    const setBarsSpy = vi.spyOn(chartAdapter!, 'setBars');
+    await app.loadMarketData('golden');
+
+    expect(setBarsSpy).toHaveBeenCalled();
+
+    app.destroy();
+  });
 });
