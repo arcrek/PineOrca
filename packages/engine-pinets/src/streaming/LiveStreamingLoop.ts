@@ -125,6 +125,16 @@ export class LiveStreamingLoop {
     return this._confirmedSnapshot;
   }
 
+  public destroy(): void {
+    this._isDestroyed = true;
+    if (this._debounceTimer !== null) {
+      clearTimeout(this._debounceTimer);
+      this._debounceTimer = null;
+    }
+    this._confirmedSnapshot = null;
+    this._formingBar = null;
+  }
+
   /**
    * Pushes a single tick into the forming bar.
    */

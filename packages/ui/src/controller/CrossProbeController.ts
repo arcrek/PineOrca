@@ -6,6 +6,7 @@ import type { TradeRowItem } from '../tester/tabs/ListOfTradesTab.js';
 export interface MarkerLayerProbeTarget {
     setSelectedTradeId(tradeId: string | null): void;
     setHighlightedTradeId(tradeId: string | null): void;
+    pulseGlow?(tradeId: string): void;
     getSelectedTradeId?(): string | null;
     getHighlightedTradeId?(): string | null;
 }
@@ -18,6 +19,7 @@ export interface MarkerInteractionProbeTarget {
 export interface ChartProbeTarget {
     centerOnTime?(timestamp: number): void;
     centerOnLogical?(logical: number): void;
+    pulseGlow?(tradeId: string): void;
     getMarkerLayer?(): MarkerLayerProbeTarget;
     getMarkerInteraction?(): MarkerInteractionProbeTarget;
 }
@@ -65,29 +67,43 @@ export class CrossProbeController {
 
     attach(chart: ChartProbeTarget, table: TradesTableProbeTarget): void {
         this.detach();
-        this.chart = chart;
+        this.attachTable(table);
+        this.attachChart(chart);
+    }
+
+    attachTable(table: TradesTableProbeTarget): void {
+        if (this.unbindTableClick) {
+            this.unbindTableClick();
+            this.unbindTableClick = null;
+        }
+        if (this.unbindTableHover) {
+            this.unbindTableHover();
+            this.unbindTableHover = null;
+        }
         this.table = table;
 
         // 1. Table -> Chart: Click trade row
         this.unbindTableClick = table.onRowClick((row) => {
             const start = performance.now();
-
-            // Pan / zoom chart to execution bar
-            if (chart.centerOnTime) {
-                chart.centerOnTime(row.time);
-            } else if (chart.centerOnLogical && row.barIndex != null) {
-                chart.centerOnLogical(row.barIndex);
+            if (this.chart) {
+                if (this.chart.centerOnTime) {
+                    this.chart.centerOnTime(row.time);
+                } else if (this.chart.centerOnLogical && row.barIndex != null) {
+                    this.chart.centerOnLogical(row.barIndex);
+                }
+                const markerLayer = this.chart.getMarkerLayer ? this.chart.getMarkerLayer() : null;
+                if (markerLayer) {
+                    markerLayer.setSelectedTradeId(row.tradeId);
+                    if (markerLayer.pulseGlow) {
+                        markerLayer.pulseGlow(row.tradeId);
+                    }
+                }
+                if (this.chart.pulseGlow) {
+                    this.chart.pulseGlow(row.tradeId);
+                }
             }
 
-            // Select on-chart trade marker
-            const markerLayer = chart.getMarkerLayer ? chart.getMarkerLayer() : null;
-            if (markerLayer) {
-                markerLayer.setSelectedTradeId(row.tradeId);
-            }
-
-            // Trigger marker pulse glow animation
             this.triggerPulseGlow(row.tradeId);
-
             const latencyMs = performance.now() - start;
             this.emitSync({
                 source: 'table',
@@ -100,9 +116,11 @@ export class CrossProbeController {
 
         // 2. Table -> Chart: Hover trade row
         this.unbindTableHover = table.onRowHover((row) => {
-            const markerLayer = chart.getMarkerLayer ? chart.getMarkerLayer() : null;
-            if (markerLayer) {
-                markerLayer.setHighlightedTradeId(row ? row.tradeId : null);
+            if (this.chart) {
+                const markerLayer = this.chart.getMarkerLayer ? this.chart.getMarkerLayer() : null;
+                if (markerLayer) {
+                    markerLayer.setHighlightedTradeId(row ? row.tradeId : null);
+                }
             }
             this.emitSync({
                 source: 'table',
@@ -111,13 +129,27 @@ export class CrossProbeController {
                 timestamp: row ? row.time : undefined,
             });
         });
+    }
 
-        // 3. Chart -> Table: Hover trade marker
+    attachChart(chart: ChartProbeTarget): void {
+        if (this.unbindChartHover) {
+            this.unbindChartHover();
+            this.unbindChartHover = null;
+        }
+        if (this.unbindChartClick) {
+            this.unbindChartClick();
+            this.unbindChartClick = null;
+        }
+        this.chart = chart;
+
         const interaction = chart.getMarkerInteraction ? chart.getMarkerInteraction() : null;
         if (interaction) {
+            // 3. Chart -> Table: Hover trade marker
             this.unbindChartHover = interaction.onHover((evt) => {
                 const tradeId = evt ? evt.tradeId : null;
-                table.highlightRow(tradeId);
+                if (this.table) {
+                    this.table.highlightRow(tradeId);
+                }
                 this.emitSync({
                     source: 'chart',
                     action: 'hover',
@@ -128,9 +160,11 @@ export class CrossProbeController {
             // 4. Chart -> Table: Click trade marker
             this.unbindChartClick = interaction.onClick((evt) => {
                 const tradeId = evt.tradeId;
-                table.selectRow(tradeId);
-                if (tradeId) {
-                    table.scrollToTrade(tradeId);
+                if (this.table) {
+                    this.table.selectRow(tradeId);
+                    if (tradeId) {
+                        this.table.scrollToTrade(tradeId);
+                    }
                 }
                 this.emitSync({
                     source: 'chart',
@@ -162,6 +196,11 @@ export class CrossProbeController {
         this.glowTimeoutId = undefined;
         this.chart = null;
         this.table = null;
+    }
+
+    destroy(): void {
+        this.detach();
+        this.syncListeners.clear();
     }
 
     onSync(cb: CrossProbeCallback): () => void {

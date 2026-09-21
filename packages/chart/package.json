@@ -2,6 +2,7 @@
   "name": "@pineorca/chart",
   "version": "0.1.0",
   "type": "module",
+  "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -30,7 +31,6 @@
   "dependencies": {
     "@luxalgo/vela": "^0.7.6",
     "@pineorca/data": "*",
-    "@pineorca/engine-pinets": "*",
     "@pineorca/worker-bridge": "*"
   },
   "scripts": {

@@ -8,6 +8,7 @@ import type {
   ProgressPayload,
   RunBacktestPayload,
   StreamTickPayload,
+  StreamTickResultPayload,
   WorkerCommand,
   WorkerResponse,
 } from './protocol.js';
@@ -57,6 +58,10 @@ export class WorkerBridge {
   private _reqSeq = 0;
   private readonly _pending = new Map<string, PendingRequest>();
   private readonly _progressListeners = new Map<string, Set<(progress: ProgressPayload) => void>>();
+  private readonly _tickResultListeners = new Map<
+    string,
+    Set<(res: StreamTickResultPayload) => void>
+  >();
   private _heartbeatTimer: NodeJS.Timeout | number | null = null;
   private _isHealthy = false;
   private _isDestroyed = false;
@@ -178,8 +183,38 @@ export class WorkerBridge {
   /**
    * Sends real-time tick to the worker for incremental state evaluation.
    */
-  public async streamTick(payload: StreamTickPayload): Promise<unknown> {
-    return this.send<StreamTickPayload, unknown>('STREAM_TICK', payload);
+  public async streamTick(
+    payload: StreamTickPayload,
+  ): Promise<StreamTickResultPayload> {
+    return this.send<StreamTickPayload, StreamTickResultPayload>(
+      'STREAM_TICK',
+      payload,
+    );
+  }
+
+  /**
+   * Registers a listener for real-time tick execution results for a specific runId.
+   * Returns an unsubscribe function.
+   */
+  public onTickResult(
+    runId: string,
+    cb: (res: StreamTickResultPayload) => void,
+  ): () => void {
+    let listeners = this._tickResultListeners.get(runId);
+    if (!listeners) {
+      listeners = new Set();
+      this._tickResultListeners.set(runId, listeners);
+    }
+    listeners.add(cb);
+    return () => {
+      const set = this._tickResultListeners.get(runId);
+      if (set) {
+        set.delete(cb);
+        if (set.size === 0) {
+          this._tickResultListeners.delete(runId);
+        }
+      }
+    };
   }
 
   /**
@@ -279,6 +314,18 @@ export class WorkerBridge {
 
     const response = data as WorkerResponse;
 
+    if (response.type === 'STREAM_TICK_RESULT') {
+      const tickRes = response.payload as StreamTickResultPayload | undefined;
+      if (tickRes && tickRes.runId) {
+        const listeners = this._tickResultListeners.get(tickRes.runId);
+        if (listeners) {
+          for (const listener of listeners) {
+            listener(tickRes);
+          }
+        }
+      }
+    }
+
     // Handle streaming progress messages without completing the pending request
     if (response.type === 'PROGRESS') {
       const progress = response.payload as ProgressPayload | undefined;
@@ -352,6 +399,7 @@ export class WorkerBridge {
   public terminate(): void {
     this._isDestroyed = true;
     this._stopHeartbeat();
+    this._tickResultListeners.clear();
 
     for (const [reqId, pending] of this._pending.entries()) {
       clearTimeout(pending.timeoutTimer);
@@ -368,5 +416,9 @@ export class WorkerBridge {
       this._worker = null;
     }
     this._isHealthy = false;
+  }
+
+  public destroy(): void {
+    this.terminate();
   }
 }

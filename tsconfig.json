@@ -19,6 +19,7 @@
     { "path": "./packages/worker-bridge" },
     { "path": "./packages/engine-pinets" },
     { "path": "./packages/chart" },
-    { "path": "./packages/ui" }
+    { "path": "./packages/ui" },
+    { "path": "./packages/shell" }
   ]
 }

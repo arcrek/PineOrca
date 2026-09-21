@@ -279,6 +279,69 @@ export class VelaChartAdapter {
         this.requestMarkerRepaint();
     }
 
+    /**
+     * Centers the chart viewport on a specific timestamp (in milliseconds).
+     */
+    centerOnTime(timestamp: number): void {
+        if (!this.vela) return;
+
+        let span = 100 * 60_000;
+        const velaAny = this.vela as any;
+
+        if (typeof velaAny.getVisibleRange === 'function') {
+            const range = velaAny.getVisibleRange();
+            if (range && range.from != null && range.to != null && range.to > range.from) {
+                span = range.to - range.from;
+            }
+        } else if (typeof velaAny.getTimeRange === 'function') {
+            const range = velaAny.getTimeRange();
+            if (range && range.from != null && range.to != null && range.to > range.from) {
+                span = range.to - range.from;
+            }
+        }
+
+        const halfSpan = span / 2;
+        const from = timestamp - halfSpan;
+        const to = timestamp + halfSpan;
+
+        if (typeof velaAny.setVisibleRange === 'function') {
+            velaAny.setVisibleRange({ from, to });
+        } else if (typeof velaAny.scrollToTime === 'function') {
+            velaAny.scrollToTime(timestamp);
+        }
+
+        this.requestMarkerRepaint();
+    }
+
+    /**
+     * Triggers a visual pulse glow animation on the trade marker for tradeId.
+     */
+    pulseGlow(tradeId: string): void {
+        this.markerLayer.pulseGlow(tradeId);
+        this.requestMarkerRepaint();
+    }
+
+    /**
+     * Updates or appends a real-time candle bar on the active chart.
+     */
+    updateCandle(bar: {
+        time: number;
+        open: number;
+        high: number;
+        low: number;
+        close: number;
+        volume: number;
+    }): void {
+        if (!this.vela) return;
+        const velaAny = this.vela as any;
+        if (typeof velaAny.updateCandle === 'function') {
+            velaAny.updateCandle(bar);
+        } else if (typeof velaAny.updateBar === 'function') {
+            velaAny.updateBar(bar);
+        }
+        this.requestMarkerRepaint();
+    }
+
     onHoverTrade(cb: (event: HoverTradeEvent | null) => void): () => void {
         return this.markerInteraction.onHover(cb);
     }

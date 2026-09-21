@@ -57,6 +57,24 @@ export interface StreamTickPayload {
   isBarClose?: boolean;
 }
 
+export interface StreamTickResultPayload {
+  runId: string;
+  bar: {
+    time: number;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+    ticksCount?: number;
+    isBarClose?: boolean;
+  };
+  metrics?: PerformanceMetrics;
+  openTrades?: unknown[];
+  closedTrades?: unknown[];
+  equity?: number;
+}
+
 export interface CancelRunPayload {
   runId: string;
 }

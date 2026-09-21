@@ -272,6 +272,10 @@ export class MonacoPineEditor {
         return this.code;
     }
 
+    getCode(): string {
+        return this.getValue();
+    }
+
     setValue(code: string): void {
         this.code = code;
         if (this.editorInstance) {
@@ -280,6 +284,10 @@ export class MonacoPineEditor {
         if (this.fallbackTextarea) {
             this.fallbackTextarea.value = code;
         }
+    }
+
+    setCode(code: string): void {
+        this.setValue(code);
     }
 
     setDiagnostics(diagnostics: EditorDiagnostic[]): void {

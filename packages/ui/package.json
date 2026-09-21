@@ -26,13 +26,20 @@
     "./controller": {
       "import": "./src/controller/CrossProbeController.ts",
       "types": "./src/controller/CrossProbeController.ts"
+    },
+    "./topbar": {
+      "import": "./src/topbar/TopBar.ts",
+      "types": "./src/topbar/TopBar.ts"
+    },
+    "./workspace": {
+      "import": "./src/workspace/PineOrcaWorkspace.ts",
+      "types": "./src/workspace/PineOrcaWorkspace.ts"
     }
   },
   "dependencies": {
     "@luxalgo/vela": "^0.7.6",
     "@pineorca/chart": "*",
     "@pineorca/data": "*",
-    "@pineorca/engine-pinets": "*",
     "@pineorca/worker-bridge": "*"
   },
   "scripts": {

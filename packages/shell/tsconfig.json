@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../data" },
+    { "path": "../worker-bridge" },
+    { "path": "../engine-pinets" },
+    { "path": "../chart" },
+    { "path": "../ui" }
+  ]
+}

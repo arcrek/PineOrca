@@ -10,15 +10,29 @@ import type {
   ProgressPayload,
   PerformanceMetrics,
   StreamTickPayload,
+  StreamTickResultPayload,
   CancelRunPayload,
   PingPayload,
 } from '@pineorca/worker-bridge';
 import { PineTranspiler } from '../transpiler/PineTranspiler';
 import { PineContext } from '../core/PineContext';
 import { PineEngine } from '../core/PineEngine';
+import { LiveStreamingLoop } from '../streaming/LiveStreamingLoop';
 
-// Active run state for cancellation tracking
-const activeRuns = new Map<string, { cancelled: boolean; context?: PineContext }>();
+export type WorkerResponseSender = (msg: WorkerResponse<any>) => void;
+
+// Active run state for cancellation tracking and live streaming continuity
+const activeRuns = new Map<
+  string,
+  {
+    cancelled: boolean;
+    context?: PineContext;
+    compiledFn?: Function;
+    initialCapital?: number;
+  }
+>();
+
+export const activeStreamingLoops = new Map<string, LiveStreamingLoop>();
 
 /**
  * Dispatches an RPC response envelope to the host thread.
@@ -155,7 +169,18 @@ export async function handleWorkerCommand(
         run.cancelled = true;
       }
       activeRuns.delete(runId);
+      const loop = activeStreamingLoops.get(runId);
+      if (loop) {
+        loop.destroy();
+        activeStreamingLoops.delete(runId);
+      }
       emitResponse(postMessageFn, reqId, 'CANCEL_RUN_RESULT', true, { runId });
+      break;
+    }
+
+    case 'STREAM_TICK': {
+      const streamPayload = payload as StreamTickPayload;
+      await handleStreamTickCommand(streamPayload, postMessageFn, reqId);
       break;
     }
 
@@ -163,7 +188,12 @@ export async function handleWorkerCommand(
       const runPayload = payload as RunBacktestPayload;
       const { runId, source, bars: bufferPayload, params, inputs } = runPayload;
 
-      const runState = { cancelled: false };
+      const runState: {
+        cancelled: boolean;
+        context?: PineContext;
+        compiledFn?: Function;
+        initialCapital?: number;
+      } = { cancelled: false };
       activeRuns.set(runId, runState);
 
       const startTime = performance.now();
@@ -184,9 +214,12 @@ export async function handleWorkerCommand(
           timeframe: runPayload.timeframe,
           inputs: inputs as any,
         });
+        const initialCap = params?.initialCapital ?? 100000;
+        runState.context = context;
+        runState.compiledFn = compiled.fn;
+        runState.initialCapital = initialCap;
 
         // Setup strategy state if needed
-        const initialCap = params?.initialCapital ?? 100000;
         if (compiled.metadata.isStrategy || source.includes('strategy(')) {
           if (!context.strategy) {
             context.strategy = {
@@ -275,13 +308,16 @@ export async function handleWorkerCommand(
           resultPayload,
         );
       } catch (err: any) {
+        activeRuns.delete(runId);
         emitResponse(postMessageFn, reqId, 'ERROR', false, undefined, {
           code: 'BACKTEST_EXECUTION_FAILED',
           message: err?.message ?? String(err),
           stack: err?.stack,
         });
       } finally {
-        activeRuns.delete(runId);
+        if (runState.cancelled) {
+          activeRuns.delete(runId);
+        }
       }
       break;
     }
@@ -293,6 +329,73 @@ export async function handleWorkerCommand(
       });
       break;
     }
+  }
+}
+
+/**
+ * Handles STREAM_TICK command executing ticks against a live streaming loop.
+ */
+export async function handleStreamTickCommand(
+  payload: StreamTickPayload,
+  postMessageFn: WorkerResponseSender,
+  reqId: string = '',
+): Promise<void> {
+  const { runId, time, price, volume, isBarClose } = payload;
+  try {
+    let loop = activeStreamingLoops.get(runId);
+    if (!loop) {
+      const run = activeRuns.get(runId);
+      if (!run || !run.context || !run.compiledFn) {
+        throw new Error(
+          `Cannot stream tick: No active backtest context found for runId "${runId}". Run a backtest first.`,
+        );
+      }
+      loop = new LiveStreamingLoop(run.context, run.compiledFn, { useDebounce: false });
+      loop.initialize(false);
+      activeStreamingLoops.set(runId, loop);
+    }
+
+    loop.pushTick({ price, volume, time });
+
+    let bar: any;
+    if (isBarClose) {
+      const closed = loop.closeBar();
+      bar = { ...closed, isBarClose: true };
+    } else {
+      bar = { ...loop.formingBar, isBarClose: false };
+    }
+
+    const initialCap = activeRuns.get(runId)?.initialCapital ?? 100000;
+    const currentEquity = (loop.context.strategy as any)?.current_equity ?? initialCap;
+    const equityCurve = (loop.context.strategy as any)?.equity_curve
+      ? Float64Array.from((loop.context.strategy as any).equity_curve)
+      : new Float64Array([currentEquity]);
+    const metrics = calculateMetrics(loop.context.strategy, initialCap, equityCurve);
+    const openTrades = (loop.context.strategy as any)?.opentrades ?? [];
+    const closedTrades = (loop.context.strategy as any)?.closedtrades ?? [];
+
+    const resultPayload: StreamTickResultPayload = {
+      runId,
+      bar,
+      metrics,
+      openTrades,
+      closedTrades,
+      equity: currentEquity,
+    };
+
+    emitResponse<StreamTickResultPayload>(
+      postMessageFn,
+      reqId,
+      'STREAM_TICK_RESULT',
+      true,
+      resultPayload,
+    );
+  } catch (err: any) {
+    emitResponse(postMessageFn, reqId, 'ERROR', false, undefined, {
+      code: 'STREAM_TICK_FAILED',
+      message: err?.message ?? String(err),
+      stack: err?.stack,
+    });
   }
 }
 

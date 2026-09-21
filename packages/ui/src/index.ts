@@ -8,3 +8,5 @@ export * from './tester/tabs/PerformanceSummaryTab.js';
 export * from './tester/tabs/ListOfTradesTab.js';
 export * from './editor/MonacoPineEditor.js';
 export * from './controller/CrossProbeController.js';
+export * from './topbar/TopBar.js';
+export * from './workspace/PineOrcaWorkspace.js';

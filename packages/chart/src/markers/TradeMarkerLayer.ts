@@ -90,6 +90,8 @@ export class TradeMarkerLayer {
     };
     private highlightedTradeId: string | null = null;
     private selectedTradeId: string | null = null;
+    private pulsingTradeId: string | null = null;
+    private pulseTimer: number | NodeJS.Timeout | null = null;
     private currentLayout: MarkerLayoutUnit[] = [];
 
     constructor(
@@ -124,6 +126,23 @@ export class TradeMarkerLayer {
         for (const item of this.currentLayout) {
             item.selected = Boolean(tradeId && this.matchesTrade(item.execution, tradeId));
         }
+    }
+
+    pulseGlow(tradeId: string): void {
+        this.pulsingTradeId = tradeId;
+        if (this.pulseTimer !== null) {
+            clearTimeout(this.pulseTimer);
+        }
+        this.pulseTimer = setTimeout(() => {
+            if (this.pulsingTradeId === tradeId) {
+                this.pulsingTradeId = null;
+            }
+            this.pulseTimer = null;
+        }, 1200);
+    }
+
+    getActivePulsingTradeId(): string | null {
+        return this.pulsingTradeId;
     }
 
     private matchesTrade(exec: TradeExecution, tradeId: string): boolean {
@@ -306,9 +325,11 @@ export class TradeMarkerLayer {
             ctx.save();
 
             // Highlight / Selection glow
-            if (unit.highlighted || unit.selected) {
-                ctx.strokeStyle = unit.selected ? '#ffeb3b' : this.styleConfig.highlightGlowColor;
-                ctx.lineWidth = unit.selected ? 2 : 1.5;
+            // Highlight / Selection / Pulsing glow
+            const isPulsing = Boolean(this.pulsingTradeId && this.matchesTrade(unit.execution, this.pulsingTradeId));
+            if (unit.highlighted || unit.selected || isPulsing) {
+                ctx.strokeStyle = isPulsing ? '#2962ff' : (unit.selected ? '#ffeb3b' : this.styleConfig.highlightGlowColor);
+                ctx.lineWidth = isPulsing ? 3 : (unit.selected ? 2 : 1.5);
                 ctx.strokeRect(unit.bounds.x - 2, unit.bounds.y - 2, unit.bounds.width + 4, unit.bounds.height + 4);
             }
 

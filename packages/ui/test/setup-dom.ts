@@ -25,6 +25,9 @@ export class MockHTMLElement {
     public value = '';
     public title = '';
     public colSpan = 1;
+    public disabled = false;
+    public selected = false;
+    public type = '';
     public parentNode: MockHTMLElement | null = null;
     public children: MockHTMLElement[] = [];
     public style: Record<string, string> = {};

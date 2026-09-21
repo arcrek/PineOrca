@@ -1,0 +1,26 @@
+{
+  "name": "@pineorca/shell",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@luxalgo/vela": "^0.7.6",
+    "@pineorca/chart": "*",
+    "@pineorca/data": "*",
+    "@pineorca/ui": "*",
+    "@pineorca/worker-bridge": "*"
+  },
+  "devDependencies": {
+    "@pineorca/engine-pinets": "*",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0"
+  }
+}
